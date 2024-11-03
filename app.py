@@ -177,33 +177,33 @@ def main():
 
     ############### K-Nearest Neighbors (KNN) ########## 
 
-    if classifier == 'K-Nearest Neighbors (KNN)':
-        st.sidebar.subheader("Model Hyperparameters")
-        n_neighbors = st.sidebar.slider("Number of Neighbors", 1, 15, step=1, key='n_neighbors')
-        metrics = st.sidebar.multiselect("What metrics to plot?", ("Confusion Matrix", "ROC Curve", "Precision-Recall Curve"))
+    # if classifier == 'K-Nearest Neighbors (KNN)':
+        # st.sidebar.subheader("Model Hyperparameters")
+        # n_neighbors = st.sidebar.slider("Number of Neighbors", 1, 15, step=1, key='n_neighbors')
+        # metrics = st.sidebar.multiselect("What metrics to plot?", ("Confusion Matrix", "ROC Curve", "Precision-Recall Curve"))
     
-        if st.sidebar.button("Classify", key='classify_KNN'):
-           st.subheader("K-Nearest Neighbors (KNN) results")
+        # if st.sidebar.button("Classify", key='classify_KNN'):
+           # st.subheader("K-Nearest Neighbors (KNN) results")
         
            # สร้างและเทรนโมเดล KNN
-           model = KNeighborsClassifier(n_neighbors=n_neighbors)
-           cv_scores = cross_val_score(model, x_train, y_train, cv=5)  # 5 folds
-           model.fit(x_train, y_train)
+           # model = KNeighborsClassifier(n_neighbors=n_neighbors)
+           # cv_scores = cross_val_score(model, x_train, y_train, cv=5)  # 5 folds
+           # model.fit(x_train, y_train)
         
            # ประมวลผลผลลัพธ์
            # accuracy = model.score(x_test, y_test)
-           y_pred = model.predict(x_test)
-           precision = precision_score(y_test, y_pred).round(2)
-           recall = recall_score(y_test, y_pred).round(2)
+           # y_pred = model.predict(x_test)
+           # precision = precision_score(y_test, y_pred).round(2)
+           # recall = recall_score(y_test, y_pred).round(2)
         
            # แสดงผลลัพธ์
            # st.write("Accuracy: ", round(accuracy, 2))
-           st.write("Cross-Validation Accuracy: ", round(cv_scores.mean(), 2))
-           st.write("Precision: ", precision)
-           st.write("Recall: ", recall)
+           # st.write("Cross-Validation Accuracy: ", round(cv_scores.mean(), 2))
+           # st.write("Precision: ", precision)
+           # st.write("Recall: ", recall)
         
            # แสดงกราฟตามที่เลือกใน sidebar
-           plot_metrics(metrics)
+           # plot_metrics(metrics) 
 
 
 
