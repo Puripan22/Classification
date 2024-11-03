@@ -7,9 +7,11 @@ from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.metrics import precision_score, recall_score 
 from sklearn.metrics import ConfusionMatrixDisplay, RocCurveDisplay, PrecisionRecallDisplay
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import precision_score, recall_score
 
 def main():
     ################ Step 1 Create Web Title #####################
@@ -69,7 +71,7 @@ def main():
     x_train, x_test, y_train, y_test = spliting_data(df)
     class_names = ['edible','poisonous']
     st.sidebar.subheader("Choose Classifiers")
-    classifier  = st.sidebar.selectbox("Classifier", ("Support Vectore Machine (SVM)", "Logistice Regression", "Random Forest"))
+    classifier  = st.sidebar.selectbox("Classifier", ("Support Vectore Machine (SVM)", "Logistice Regression", "Random Forest", "K-Nearest Neighbors (KNN)"))
 
 
      ############### Step 3 Train a SVM Classifier ##########
@@ -82,17 +84,23 @@ def main():
 
         metrics = st.sidebar.multiselect("What metrics to plot?", ("Confusion Matrix", "ROC Curve", "Precision-Recall Curve"))
 
-        if st.sidebar.button("Classify", key='classify'):
+        if st.sidebar.button("Classify", key='classify_SVM'):
             st.subheader("Supper Vector Machine (SVM) results")
-            model = SVC(C=C, kernel=kernel, gamma=gamma)
-            model.fit(x_train,y_train)
-            accuracy = model.score(x_test, y_test)
-            y_pred   = model.predict(x_test)
 
+            # สร้างและเทรนโมเดล SVM
+            model = SVC(C=C, kernel=kernel, gamma=gamma)
+            cv_scores = cross_val_score(model, x_train, y_train, cv=5)  # 5 folds
+            model.fit(x_train,y_train)
+            
+            # ประมวลผลผลลัพธ์
+            # accuracy = model.score(x_test, y_test)
+            y_pred   = model.predict(x_test)
             precision = precision_score(y_test, y_pred).round(2)
             recall = recall_score(y_test, y_pred).round(2)
             
-            st.write("Accuracy: ", round(accuracy, 2))
+            # แสดงผลลัพธ์
+            # st.write("Accuracy: ", round(accuracy, 2))
+            st.write("Cross-Validation Accuracy: ", round(cv_scores.mean(), 2))
             st.write("Precision: ", precision)
             st.write("Recall: ", recall)
             plot_metrics(metrics)
@@ -102,6 +110,33 @@ def main():
 
      ############### Step 4 Training a Logistic Regression Classifier ##########
      # Start you Code here #
+    
+    if classifier == 'Logistice Regression':
+        st.sidebar.subheader("Model Hyperparameters")
+        C = st.sidebar.number_input("C (Regularization parameter)", 0.01, 10.0, step=0.01, key='C_LR')
+
+        metrics = st.sidebar.multiselect("What metrics to plot?", ("Confusion Matrix", "ROC Curve", "Precision-Recall Curve"))
+
+        if st.sidebar.button("Classify", key='classify_LR'):
+            st.subheader("Logistic Regression results")
+
+            # สร้างและเทรนโมเดล LR
+            model = LogisticRegression(C=C, max_iter=1000)
+            cv_scores = cross_val_score(model, x_train, y_train, cv=5)  # 5 folds
+            model.fit(x_train, y_train)
+            
+            # ประมวลผลผลลัพธ์
+            # accuracy = model.score(x_test, y_test)
+            y_pred = model.predict(x_test)
+            precision = precision_score(y_test, y_pred).round(2)
+            recall = recall_score(y_test, y_pred).round(2)
+            
+            # แสดงผลลัพธ์
+            # st.write("Accuracy: ", round(accuracy, 2))
+            st.write("Cross-Validation Accuracy: ", round(cv_scores.mean(), 2))
+            st.write("Precision: ", precision)
+            st.write("Recall: ", recall)
+            plot_metrics(metrics)
 
 
 
@@ -111,6 +146,64 @@ def main():
 
      ############### Step 5 Training a Random Forest Classifier ##########
     # Start you Code here #
+
+    if classifier == 'Random Forest':
+        st.sidebar.subheader("Model Hyperparameters")
+        n_estimators = st.sidebar.number_input("Number of trees in forest", 100, 5000, step=10, key='n_estimators')
+        max_depth = st.sidebar.number_input("Maximum depth of trees", 1, 20, step=1, key='max_depth')
+        metrics = st.sidebar.multiselect("What metrics to plot?", ("Confusion Matrix", "ROC Curve", "Precision-Recall Curve"))
+
+        if st.sidebar.button("Classify", key='classify_RF'):
+            st.subheader("Random Forest results")
+
+            # สร้างและเทรนโมเดล RF
+            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=0)
+            cv_scores = cross_val_score(model, x_train, y_train, cv=5)  # 5 folds
+            model.fit(x_train, y_train)
+            
+            # ประมวลผลผลลัพธ์
+            # accuracy = model.score(x_test, y_test)
+            y_pred = model.predict(x_test)
+            precision = precision_score(y_test, y_pred).round(2)
+            recall = recall_score(y_test, y_pred).round(2)
+            
+            # แสดงผลลัพธ์
+            # st.write("Accuracy: ", round(accuracy, 2))
+            st.write("Cross-Validation Accuracy: ", round(cv_scores.mean(), 2))
+            st.write("Precision: ", precision)
+            st.write("Recall: ", recall)
+            plot_metrics(metrics)
+
+
+    ############### K-Nearest Neighbors (KNN) ########## 
+
+    if classifier == 'K-Nearest Neighbors (KNN)':
+        st.sidebar.subheader("Model Hyperparameters")
+        n_neighbors = st.sidebar.slider("Number of Neighbors", 1, 15, step=1, key='n_neighbors')
+        metrics = st.sidebar.multiselect("What metrics to plot?", ("Confusion Matrix", "ROC Curve", "Precision-Recall Curve"))
+    
+        if st.sidebar.button("Classify", key='classify_KNN'):
+           st.subheader("K-Nearest Neighbors (KNN) results")
+        
+           # สร้างและเทรนโมเดล KNN
+           model = KNeighborsClassifier(n_neighbors=n_neighbors)
+           cv_scores = cross_val_score(model, x_train, y_train, cv=5)  # 5 folds
+           model.fit(x_train, y_train)
+        
+           # ประมวลผลผลลัพธ์
+           # accuracy = model.score(x_test, y_test)
+           y_pred = model.predict(x_test)
+           precision = precision_score(y_test, y_pred).round(2)
+           recall = recall_score(y_test, y_pred).round(2)
+        
+           # แสดงผลลัพธ์
+           # st.write("Accuracy: ", round(accuracy, 2))
+           st.write("Cross-Validation Accuracy: ", round(cv_scores.mean(), 2))
+           st.write("Precision: ", precision)
+           st.write("Recall: ", recall)
+        
+           # แสดงกราฟตามที่เลือกใน sidebar
+           plot_metrics(metrics)
 
 
 
